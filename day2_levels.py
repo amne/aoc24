@@ -11,10 +11,30 @@ def load_level_lists(filename):
     return lists
 
 def check_difference_rule(number_list):
-    """Check if difference between consecutive numbers is less than 2"""
+    """
+    Check if:
+    1. Difference between consecutive numbers is less than 3
+    2. Numbers consistently increase or decrease based on first direction
+    """
+    if len(number_list) <= 1:
+        return True
+        
+    # Determine initial direction
+    increasing = number_list[1] > number_list[0]
+    
     for i in range(len(number_list) - 1):
-        if abs(number_list[i] - number_list[i + 1]) >= 2:
+        diff = number_list[i + 1] - number_list[i]
+        
+        # Check threshold
+        if abs(diff) >= 3:
             return False
+            
+        # Check direction consistency
+        if increasing and diff <= 0:
+            return False
+        if not increasing and diff >= 0:
+            return False
+            
     return True
 
 def process_levels(filename):
