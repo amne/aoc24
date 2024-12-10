@@ -78,19 +78,12 @@ def find_x_mas(matrix):
     def is_valid_position(row, col):
         return 0 <= row < rows and 0 <= col < cols
     
-    def check_mas_line(start_row, start_col, delta_row, delta_col):
-        """Check if 'MAS' exists from given position in given direction"""
-        word = "MAS"
-        if not is_valid_position(start_row + (len(word)-1)*delta_row, 
-                               start_col + (len(word)-1)*delta_col):
-            return False
-            
-        for i in range(len(word)):
-            current_row = start_row + i*delta_row
-            current_col = start_col + i*delta_col
-            if matrix[current_row][current_col] != word[i]:
-                return False
-        return True
+    def check_mas_line(m_row, m_col, s_row, s_col):
+        """Check if 'MAS' exists with M at start, S at end"""
+        return (is_valid_position(m_row, m_col) and 
+                is_valid_position(s_row, s_col) and
+                matrix[m_row][m_col] == 'M' and 
+                matrix[s_row][s_col] == 'S')
     
     # Check each position as potential center of X
     for row in range(1, rows-1):  # Skip edges as X needs space
@@ -101,12 +94,10 @@ def find_x_mas(matrix):
                 
             # Check both diagonal pairs independently
             # Try first diagonal pair (down-right/up-left)
-            if (check_mas_line(row-1, col-1, -1, -1) and 
-                check_mas_line(row+1, col+1, 1, 1)):
+            if (check_mas_line(row-1, col-1, row+1, col+1)):
                 count += 1
             # Try second diagonal pair (down-left/up-right)
-            if (check_mas_line(row-1, col+1, -1, 1) and 
-                check_mas_line(row+1, col-1, 1, -1)):
+            if (check_mas_line(row-1, col+1, row+1, col-1)):
                 count += 1
                     
     return count
