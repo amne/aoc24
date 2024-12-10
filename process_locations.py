@@ -17,10 +17,11 @@ def process_locations(filename):
     list_a.sort()
     list_b.sort()
     
-    # Calculate sum of differences
-    total_diff = sum(abs(a - b) for a, b in zip(list_a, list_b))
-    
-    return total_diff
+    return calculate_total_difference(list_a, list_b)
+
+def calculate_total_difference(list_a, list_b):
+    """Calculate the sum of absolute differences between two sorted lists"""
+    return sum(abs(a - b) for a, b in zip(list_a, list_b))
 
 if __name__ == "__main__":
     try:
