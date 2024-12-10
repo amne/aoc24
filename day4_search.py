@@ -6,6 +6,7 @@ def load_matrix(filename):
             # Convert each line to a list of characters, removing whitespace
             row = [char for char in line.strip()]
             matrix.append(row)
+    [print(l) for l in matrix]
     return matrix
 
 def search_word(matrix, word):
@@ -132,6 +133,6 @@ def find_xmas(filename):
         return 0, 0
 
 if __name__ == "__main__":
-    xmas_count, x_mas_count = find_xmas("day4_search.txt")
+    xmas_count, x_mas_count = find_xmas("day4_search_sample.txt")
     print(f"Found 'XMAS' {xmas_count} times in the matrix")
     print(f"Found X-shaped 'MAS' arrangements: {x_mas_count}")
