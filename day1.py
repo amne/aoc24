@@ -41,10 +41,10 @@ def calculate_similarity(list_a, list_b):
 
 if __name__ == "__main__":
     try:
-        difference, similarity = process_locations("locations.txt")
+        difference, similarity = process_locations("day1_locations.txt")
         print(f"Sum of differences: {difference}")
         print(f"Similarity score: {similarity}")
     except FileNotFoundError:
-        print("Error: locations.txt file not found")
+        print("Error: day1_locations.txt file not found")
     except ValueError:
         print("Error: Invalid file format. Each line should contain two integers separated by space")
