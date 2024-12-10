@@ -66,53 +66,7 @@ def find_x_mas(matrix):
     """
     if not matrix or not matrix[0]:
         return 0
-        
-    rows = len(matrix)
-    cols = len(matrix[0])
-    count = 0
-    
-    def is_valid_position(row, col):
-        return 0 <= row < rows and 0 <= col < cols
-    
-    # Skip edges since we need space for the X pattern
-    for row in range(2, rows-2):
-        for col in range(2, cols-2):
-            if matrix[row][col] != 'A':
-                continue
-                
-            # Check for Ms on left side
-            if (is_valid_position(row-2, col-2) and is_valid_position(row+2, col-2) and
-                matrix[row-2][col-2] == 'M' and matrix[row+2][col-2] == 'M'):
-                # Check for Ss on right side
-                if (is_valid_position(row-1, col+1) and is_valid_position(row+1, col+1) and
-                    matrix[row-1][col+1] == 'S' and matrix[row+1][col+1] == 'S'):
-                    count += 1
-            
-            # Check for Ms on right side
-            if (is_valid_position(row-2, col+2) and is_valid_position(row+2, col+2) and
-                matrix[row-2][col+2] == 'M' and matrix[row+2][col+2] == 'M'):
-                # Check for Ss on left side
-                if (is_valid_position(row-1, col-1) and is_valid_position(row+1, col-1) and
-                    matrix[row-1][col-1] == 'S' and matrix[row+1][col-1] == 'S'):
-                    count += 1
-            
-            # Check for Ms on top
-            if (is_valid_position(row-2, col-2) and is_valid_position(row-2, col+2) and
-                matrix[row-2][col-2] == 'M' and matrix[row-2][col+2] == 'M'):
-                # Check for Ss on bottom
-                if (is_valid_position(row+1, col-1) and is_valid_position(row+1, col+1) and
-                    matrix[row+1][col-1] == 'S' and matrix[row+1][col+1] == 'S'):
-                    count += 1
-            
-            # Check for Ms on bottom
-            if (is_valid_position(row+2, col-2) and is_valid_position(row+2, col+2) and
-                matrix[row+2][col-2] == 'M' and matrix[row+2][col+2] == 'M'):
-                # Check for Ss on top
-                if (is_valid_position(row-1, col-1) and is_valid_position(row-1, col+1) and
-                    matrix[row-1][col-1] == 'S' and matrix[row-1][col+1] == 'S'):
-                    count += 1
-                    
-    return count
+    return 0
 
 def find_xmas(filename):
     """
