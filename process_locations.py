@@ -35,7 +35,7 @@ def calculate_similarity(list_a, list_b):
     """Calculate similarity by counting occurrences of each item from A in B"""
     similarity = 0
     for item in list_a:
-        count_in_b = list_b.count(item)
+        count_in_b = item * list_b.count(item)
         similarity += count_in_b
     return similarity
 
