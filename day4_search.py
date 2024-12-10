@@ -78,16 +78,14 @@ def find_x_mas(matrix):
     def is_valid_position(row, col):
         return 0 <= row < rows and 0 <= col < cols
     
-    def check_mas_pattern(m1_row, m1_col, s1_row, s1_col, m2_row, m2_col, s2_row, s2_col):
-        """Check if 'MAS' exists in both directions with M at ends and S in middle"""
+    def check_mas_pattern(m1_row, m1_col, s_row, s_col, m2_row, m2_col):
+        """Check if 'MAS' exists with M at both ends and S in middle"""
         return (is_valid_position(m1_row, m1_col) and 
-                is_valid_position(s1_row, s1_col) and
+                is_valid_position(s_row, s_col) and
                 is_valid_position(m2_row, m2_col) and 
-                is_valid_position(s2_row, s2_col) and
                 matrix[m1_row][m1_col] == 'M' and 
-                matrix[s1_row][s1_col] == 'S' and
-                matrix[m2_row][m2_col] == 'M' and
-                matrix[s2_row][s2_col] == 'S')
+                matrix[s_row][s_col] == 'S' and
+                matrix[m2_row][m2_col] == 'M')
     
     # Check each position as potential center of X
     for row in range(1, rows-1):  # Skip edges as X needs space
@@ -96,18 +94,26 @@ def find_x_mas(matrix):
             if matrix[row][col] != 'A':  # Center must be 'A'
                 continue
                 
-            # Check both diagonal pairs independently
-            # Try first diagonal pair (down-right/up-left)
+            # Check all four possible X patterns
+            # Pattern 1: M-S-A-S-M (diagonal \)
             if check_mas_pattern(row-2, col-2,  # M1
-                               row-1, col-1,    # S1
-                               row+2, col+2,    # M2
-                               row+1, col+1):   # S2
+                               row-1, col-1,    # S
+                               row+2, col+2):   # M2
                 count += 1
-            # Try second diagonal pair (down-left/up-right)
+            # Pattern 2: M-S-A-S-M (diagonal /)
             if check_mas_pattern(row-2, col+2,  # M1
-                               row-1, col+1,    # S1
-                               row+2, col-2,    # M2
-                               row+1, col-1):   # S2
+                               row-1, col+1,    # S
+                               row+2, col-2):   # M2
+                count += 1
+            # Pattern 3: S-M-A-M-S (diagonal \)
+            if check_mas_pattern(row-1, col-1,  # M1
+                               row-2, col-2,    # S
+                               row+1, col+1):   # M2
+                count += 1
+            # Pattern 4: S-M-A-M-S (diagonal /)
+            if check_mas_pattern(row-1, col+1,  # M1
+                               row-2, col+2,    # S
+                               row+1, col-1):   # M2
                 count += 1
                     
     return count
