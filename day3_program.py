@@ -2,6 +2,7 @@ import re
 
 def load_program(filename):
     """Load program text from file"""
+    # return "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
     with open(filename, 'r') as file:
         return file.read().strip()
 
@@ -37,7 +38,7 @@ def extract_controlled_multiplications(program):
         mul_pos = mul_match.start()
         # Find the closest control instruction before this multiplication
         closest_do = max((pos for pos in do_positions if pos < mul_pos), default=-1)
-        closest_dont = max((pos for pos in dont_positions if pos < mul_pos), default=-1)
+        closest_dont = max((pos for pos in dont_positions if pos < mul_pos), default=-2)
         
         # If closest control is 'do' or no control found, include the multiplication
         if closest_do > closest_dont:
