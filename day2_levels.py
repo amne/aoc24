@@ -26,7 +26,7 @@ def check_difference_rule(number_list):
         diff = number_list[i + 1] - number_list[i]
         
         # Check threshold (must be between 1 and 3)
-        if abs(diff) >= 3 or abs(diff) < 1:
+        if abs(diff) > 3 or abs(diff) < 1:
             return False
             
         # Check direction consistency
@@ -47,7 +47,7 @@ def process_levels(filename):
 
 if __name__ == "__main__":
     try:
-        result = process_levels("day2_levels_sample.txt")
+        result = process_levels("day2_levels.txt")
         print(f"Number of valid lists: {result}")
     except FileNotFoundError:
         print("Error: Input file 'day2_levels.txt' not found")
