@@ -6,7 +6,6 @@ def load_matrix(filename):
             # Convert each line to a list of characters, removing whitespace
             row = [char for char in line.strip()]
             matrix.append(row)
-    [print(l) for l in matrix]
     return matrix
 
 def search_word(matrix, word):
@@ -72,12 +71,36 @@ def find_x_mas(matrix):
     count = 0
     
     # Skip edges since we need space for the X pattern
-    for row in range(2, rows-2):
-        for col in range(2, cols-2):
+    for row in range(1, rows-1):
+        for col in range(1, cols-1):
             if matrix[row][col] != 'A':
                 continue
                 
             # TODO: Check for M and S characters in X pattern around the A
+            # count = count + 1
+            # match pairs
+            # print(matrix[row-1][col-1], matrix[row-1][col], matrix[row-1][col+1])
+            # print(matrix[row][col-1], matrix[row][col], matrix[row][col+1])
+            # print(matrix[row+1][col-1], matrix[row+1][col], matrix[row+1][col+1])
+            if ((
+                matrix[row-1][col-1] in ['M','S']
+                and matrix[row+1][col+1] in ['M','S']
+                and matrix[row-1][col-1] != matrix[row+1][col+1]
+                ) and 
+                (
+                 (matrix[row-1][col-1] == matrix[row-1][col+1]
+                  and matrix[row+1][col-1] == matrix[row+1][col+1]
+                 ) or (
+                 matrix[row-1][col-1] == matrix[row+1][col-1]
+                 and matrix[row-1][col+1] == matrix[row+1][col+1]
+                 )
+                )):
+                count = count + 1
+
+
+
+
+
             
     return count
 
@@ -99,6 +122,6 @@ def find_xmas(filename):
         return 0, 0
 
 if __name__ == "__main__":
-    xmas_count, x_mas_count = find_xmas("day4_search_sample.txt")
+    xmas_count, x_mas_count = find_xmas("day4_search.txt")
     print(f"Found 'XMAS' {xmas_count} times in the matrix")
     print(f"Found X-shaped 'MAS' arrangements: {x_mas_count}")
