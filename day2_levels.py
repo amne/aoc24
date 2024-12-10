@@ -37,18 +37,41 @@ def check_difference_rule(number_list):
             
     return True
 
+def check_difference_rule_with_skip(number_list):
+    """
+    Check if list follows the rule after removing one element.
+    Rule: 
+    1. Difference between consecutive numbers is between 1 and 3 (1 <= diff < 3)
+    2. Numbers consistently increase or decrease based on first direction
+    """
+    if len(number_list) <= 2:  # Too short to skip anything
+        return check_difference_rule(number_list)
+    
+    # Try removing each element and check if remaining list follows rule
+    for skip_idx in range(len(number_list)):
+        # Create new list without the current element
+        test_list = number_list[:skip_idx] + number_list[skip_idx + 1:]
+        if check_difference_rule(test_list):
+            return True
+    
+    return False
+
 def process_levels(filename):
     """
-    Process level lists and count those following the difference rule
+    Process level lists and count those following the rules:
+    1. Strict rule: all elements must follow the pattern
+    2. Skip rule: allowing one element to be removed
     """
     lists = load_level_lists(filename)
-    valid_count = sum(1 for lst in lists if check_difference_rule(lst))
-    return valid_count
+    strict_count = sum(1 for lst in lists if check_difference_rule(lst))
+    skip_count = sum(1 for lst in lists if check_difference_rule_with_skip(lst))
+    return strict_count, skip_count
 
 if __name__ == "__main__":
     try:
-        result = process_levels("day2_levels.txt")
-        print(f"Number of valid lists: {result}")
+        strict_count, skip_count = process_levels("day2_levels.txt")
+        print(f"Number of valid lists (strict rule): {strict_count}")
+        print(f"Number of valid lists (with one skip allowed): {skip_count}")
     except FileNotFoundError:
         print("Error: Input file 'day2_levels.txt' not found")
     except Exception as e:
