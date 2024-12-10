@@ -47,7 +47,7 @@ def process_levels(filename):
 
 if __name__ == "__main__":
     try:
-        result = process_levels("day2_levels.txt")
+        result = process_levels("day2_levels_sample.txt")
         print(f"Number of valid lists: {result}")
     except FileNotFoundError:
         print("Error: Input file 'day2_levels.txt' not found")
