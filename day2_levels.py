@@ -13,7 +13,7 @@ def load_level_lists(filename):
 def check_difference_rule(number_list):
     """
     Check if:
-    1. Difference between consecutive numbers is less than 3
+    1. Difference between consecutive numbers is between 1 and 3 (1 <= diff < 3)
     2. Numbers consistently increase or decrease based on first direction
     """
     if len(number_list) <= 1:
@@ -25,8 +25,8 @@ def check_difference_rule(number_list):
     for i in range(len(number_list) - 1):
         diff = number_list[i + 1] - number_list[i]
         
-        # Check threshold
-        if abs(diff) >= 3:
+        # Check threshold (must be between 1 and 3)
+        if abs(diff) >= 3 or abs(diff) < 1:
             return False
             
         # Check direction consistency
