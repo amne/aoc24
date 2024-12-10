@@ -71,50 +71,46 @@ def find_x_mas(matrix):
     cols = len(matrix[0])
     count = 0
     
-    # Define the two diagonal directions for X shape
-    diag1 = [(1, 1), (-1, -1)]  # down-right and up-left
-    diag2 = [(1, -1), (-1, 1)]  # down-left and up-right
-    
     def is_valid_position(row, col):
         return 0 <= row < rows and 0 <= col < cols
     
-    def check_mas_pattern(m1_row, m1_col, s_row, s_col, m2_row, m2_col):
-        """Check if 'MAS' exists with M at both ends and S in middle"""
-        return (is_valid_position(m1_row, m1_col) and 
-                is_valid_position(s_row, s_col) and
-                is_valid_position(m2_row, m2_col) and 
-                matrix[m1_row][m1_col] == 'M' and 
-                matrix[s_row][s_col] == 'S' and
-                matrix[m2_row][m2_col] == 'M')
-    
-    # Check each position as potential center of X
-    for row in range(1, rows-1):  # Skip edges as X needs space
-        for col in range(1, cols-1):
-            # Check if this position can be center of an X
-            if matrix[row][col] != 'A':  # Center must be 'A'
+    # Skip edges since we need space for the X pattern
+    for row in range(2, rows-2):
+        for col in range(2, cols-2):
+            if matrix[row][col] != 'A':
                 continue
                 
-            # Check all four possible X patterns
-            # Pattern 1: M-S-A-S-M (diagonal \)
-            if check_mas_pattern(row-2, col-2,  # M1
-                               row-1, col-1,    # S
-                               row+2, col+2):   # M2
-                count += 1
-            # Pattern 2: M-S-A-S-M (diagonal /)
-            if check_mas_pattern(row-2, col+2,  # M1
-                               row-1, col+1,    # S
-                               row+2, col-2):   # M2
-                count += 1
-            # Pattern 3: S-M-A-M-S (diagonal \)
-            if check_mas_pattern(row-1, col-1,  # M1
-                               row-2, col-2,    # S
-                               row+1, col+1):   # M2
-                count += 1
-            # Pattern 4: S-M-A-M-S (diagonal /)
-            if check_mas_pattern(row-1, col+1,  # M1
-                               row-2, col+2,    # S
-                               row+1, col-1):   # M2
-                count += 1
+            # Check for Ms on left side
+            if (is_valid_position(row-2, col-2) and is_valid_position(row+2, col-2) and
+                matrix[row-2][col-2] == 'M' and matrix[row+2][col-2] == 'M'):
+                # Check for Ss on right side
+                if (is_valid_position(row-1, col+1) and is_valid_position(row+1, col+1) and
+                    matrix[row-1][col+1] == 'S' and matrix[row+1][col+1] == 'S'):
+                    count += 1
+            
+            # Check for Ms on right side
+            if (is_valid_position(row-2, col+2) and is_valid_position(row+2, col+2) and
+                matrix[row-2][col+2] == 'M' and matrix[row+2][col+2] == 'M'):
+                # Check for Ss on left side
+                if (is_valid_position(row-1, col-1) and is_valid_position(row+1, col-1) and
+                    matrix[row-1][col-1] == 'S' and matrix[row+1][col-1] == 'S'):
+                    count += 1
+            
+            # Check for Ms on top
+            if (is_valid_position(row-2, col-2) and is_valid_position(row-2, col+2) and
+                matrix[row-2][col-2] == 'M' and matrix[row-2][col+2] == 'M'):
+                # Check for Ss on bottom
+                if (is_valid_position(row+1, col-1) and is_valid_position(row+1, col+1) and
+                    matrix[row+1][col-1] == 'S' and matrix[row+1][col+1] == 'S'):
+                    count += 1
+            
+            # Check for Ms on bottom
+            if (is_valid_position(row+2, col-2) and is_valid_position(row+2, col+2) and
+                matrix[row+2][col-2] == 'M' and matrix[row+2][col+2] == 'M'):
+                # Check for Ss on top
+                if (is_valid_position(row-1, col-1) and is_valid_position(row-1, col+1) and
+                    matrix[row-1][col-1] == 'S' and matrix[row-1][col+1] == 'S'):
+                    count += 1
                     
     return count
 
