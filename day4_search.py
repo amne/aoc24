@@ -66,7 +66,20 @@ def find_x_mas(matrix):
     """
     if not matrix or not matrix[0]:
         return 0
-    return 0
+        
+    rows = len(matrix)
+    cols = len(matrix[0])
+    count = 0
+    
+    # Skip edges since we need space for the X pattern
+    for row in range(2, rows-2):
+        for col in range(2, cols-2):
+            if matrix[row][col] != 'A':
+                continue
+                
+            # TODO: Check for M and S characters in X pattern around the A
+            
+    return count
 
 def find_xmas(filename):
     """
