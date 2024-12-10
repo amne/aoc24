@@ -99,18 +99,14 @@ def find_x_mas(matrix):
             if matrix[row][col] != 'A':  # Center must be 'A'
                 continue
                 
-            # Check both diagonal pairs
-            found_x = False
+            # Check both diagonal pairs independently
             # Try first diagonal pair (down-right/up-left)
             if (check_mas_line(row-1, col-1, -1, -1) and 
                 check_mas_line(row+1, col+1, 1, 1)):
-                found_x = True
+                count += 1
             # Try second diagonal pair (down-left/up-right)
-            elif (check_mas_line(row-1, col+1, -1, 1) and 
-                  check_mas_line(row+1, col-1, 1, -1)):
-                found_x = True
-                
-            if found_x:
+            if (check_mas_line(row-1, col+1, -1, 1) and 
+                check_mas_line(row+1, col-1, 1, -1)):
                 count += 1
                     
     return count
