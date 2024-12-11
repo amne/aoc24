@@ -6,6 +6,12 @@ dap.adapters.lldb = {
     name = "lldb",
 }
 
+dap.adapters.python = {
+    type = 'executable',
+    command = 'python',
+    args = { '-m', 'debugpy.adapter' }
+}
+
 dap.configurations.rust = {
    {
       name = "wait to attach",
@@ -17,5 +23,25 @@ dap.configurations.rust = {
         end,
       waitFor = true
     }
+}
 
+dap.configurations.python = {
+    {
+        type = 'python',
+        request = 'launch',
+        name = "Launch file",
+        program = "${file}",
+        pythonPath = function()
+            return '/usr/bin/python3'
+        end,
+    },
+    {
+        type = 'python',
+        request = 'attach',
+        name = 'Attach remote',
+        connect = {
+            host = "127.0.0.1",
+            port = 5678
+        },
+    }
 }
