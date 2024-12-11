@@ -68,6 +68,70 @@ def count_patrol_dots(filename):
             
     return len(dots_covered)
 
+def simulate_patrol(patrol_map, start_row, start_col, start_dir):
+    """Simulate patrol path and return visited positions or None if exits map"""
+    rows, cols = len(patrol_map), len(patrol_map[0])
+    row, col, direction = start_row, start_col, start_dir
+    visited = [(row, col)]
+    
+    while True:
+        next_row, next_col = move_in_direction(row, col, direction)
+        
+        # Check if guard exits the map
+        if (next_row < 0 or next_row >= rows or 
+            next_col < 0 or next_col >= cols):
+            return None
+        
+        # Check if guard hits obstacle
+        if patrol_map[next_row][next_col] == '#':
+            direction = get_next_direction(direction)
+            continue
+            
+        # Move guard
+        row, col = next_row, next_col
+        current_pos = (row, col)
+        
+        # Check if we've created a loop
+        if current_pos in visited:
+            # Return positions from the start of the loop
+            loop_start = visited.index(current_pos)
+            return visited[loop_start:]
+            
+        visited.append(current_pos)
+
+def count_possible_loop_points(filename):
+    """Count number of points that can create a patrol loop when blocked"""
+    patrol_map = load_patrol_map(filename)
+    guard = find_guard(patrol_map)
+    if not guard:
+        return 0
+    
+    start_row, start_col, start_dir = guard
+    loop_points = set()
+    
+    # Try each position as a potential obstruction
+    for row in range(len(patrol_map)):
+        for col in range(len(patrol_map[0])):
+            # Skip if not empty space
+            if patrol_map[row][col] != '.':
+                continue
+                
+            # Add temporary obstruction
+            patrol_map[row][col] = '#'
+            
+            # Check if this creates a loop
+            path = simulate_patrol(patrol_map, start_row, start_col, start_dir)
+            if path is not None:
+                loop_points.add((row, col))
+                
+            # Remove temporary obstruction
+            patrol_map[row][col] = '.'
+    
+    return len(loop_points)
+
 if __name__ == "__main__":
-    result = count_patrol_dots("day6_patrol.txt")
-    print(f"Number of dots covered: {result}")
+    dots_result = count_patrol_dots("day6_patrol.txt")
+    print(f"Number of dots covered: {dots_result}")
+    
+    loops_result = count_possible_loop_points("day6_patrol.txt")
+    print(f"Number of possible loop points: {loops_result}")
