@@ -23,23 +23,37 @@ def split_stone(stone):
         return ['1']
     return [str(int(stone) * 2024)]
 
+blink_cache = {}
+def blink_stone(stone, blink_count = 1):
+    if len(stone) == 1:
+        if (stone[0] + '_' + str(blink_count)) in blink_cache:
+            return blink_cache[stone[0] + '_' + str(blink_count)]
+    if blink_count == 1:
+        return sum([len(split_stone(s)) for s in stone])
+    s = sum([blink_stone(split_stone(s), blink_count - 1) for s in stone])
+    if len(stone) == 1:
+        blink_cache[stone[0] + '_' + str(blink_count)] = s
+    return s
+
 def calc(stones):
     
-    num_blinks = 25
+    num_blinks = 75
 
-    num_stones = 0
-    splits = []
-    for s in stones:
-        splits = s
-        for b in range(0, num_blinks):
-            new_splits = []
-            for stone in splits:
-                new_splits += split_stone(stone)
-            splits = new_splits
-            print("blink #", b, len(splits))
-        num_stones += len(splits)
+    # num_stones = 0
+    # splits = []
+    # for s in stones:
+    #     splits = s
+    #     for b in range(0, num_blinks):
+    #         new_splits = []
+    #         for stone in splits:
+    #             new_splits += split_stone(stone)
+    #         splits = new_splits
+    #         # print("blink #", b, len(splits))
+    #     num_stones += len(splits)
 
-    print(num_stones)
+    print('w cache: ', sum([blink_stone(s, num_blinks) for s in stones]))
+
+    # print('no cache: ', num_stones)
 
 def main():
     # filename = "day11_blink_sample.txt"
