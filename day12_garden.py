@@ -15,8 +15,15 @@ def calculate_fence_cost(garden_map):
     """
     Calculate fence cost for the garden map.
     """
+    UP = 8
+    LEFT = 4
+    DOWN = 2
+    RIGHT = 1
     # directions are bitmask: 1: right, 2: down, 4: left, 8: up
-    directions = {1: (0,1), 2: (1,0), 4: (0,-1), 8: (-1,0)}
+    directions = {RIGHT: (0,1), DOWN: (1,0), LEFT: (0,-1), UP: (-1,0)}
+    concave_corners = [UP & LEFT, DOWN & LEFT, DOWN & RIGHT, UP & RIGHT]
+    corner_pairs = [(UP, RIGHT), (RIGHT, DOWN), (DOWN, LEFT), (LEFT, UP)]
+    # directions in binary: right: 0b0001, down: 0b0010, left: 0b0100, up: 0b1000 
     # each point is tagged with an area id and a bitmask of connected points
     tagged_garden_map = [[(0,0) for c in range(0, len(garden_map[l]))] for l in range(0, len(garden_map))]
     areas = {}
@@ -54,23 +61,57 @@ def calculate_fence_cost(garden_map):
     # print("===")
     # for l in range(0, len(tagged_garden_map)):
     #     print("".join([str(tagged_garden_map[l][c][0]) for c in range(0, len(tagged_garden_map[l]))]))
+    # print("===")
     # for l in range(0, len(tagged_garden_map)):
     #     for c in range(0, len(tagged_garden_map[l])):
     #         # print(f"{tagged_garden_map[l][c][1]:04b}", end=" ")
     #         print(format(tagged_garden_map[l][c][1], "04b"), end=" ")
     #     print("")
+    # print("===")
+    # for l in range(0, len(tagged_garden_map)):
+    #     for c in range(0, len(tagged_garden_map[l])):
+    #         # print(f"{tagged_garden_map[l][c][1]:04b}", end=" ")
+    #         print("%s*%s" % (tagged_garden_map[l][c][0], format(tagged_garden_map[l][c][1] ^ 0b1111, "04b")), end=" ")
+    #     print("")
     # for a in areas:
     #     print(f"area {a}: {areas[a]}")
     cost = 0
+    side_cost = 0
     # each garden point is fenced on the sides that are not connected to another garden point
     # for each bitmask calculate how many zeroes in the first 4 bits
     for a in areas:
         area_cost = 0
+        side_area_cost = 0
         for p in areas[a]:
             area_cost += format(tagged_garden_map[p[0]][p[1]][1], "04b").count("0")
+            side_area_cost += sum([1 for c in corner_pairs if ((0b1111 ^ tagged_garden_map[p[0]][p[1]][1]) & (c[0]+c[1])) == (c[0]+c[1])])
+            # check if it is inside corner
+            # an inside corner has neighbours up/left, up/right, down/left, down/right
+            # but the point obtained by adding both directions is not in the area
+            for ccp in corner_pairs:
+                if tagged_garden_map[p[0]][p[1]][1] & (ccp[0] + ccp[1]) == (ccp[0] + ccp[1]):
+                    inside_p = (p[0]+directions[ccp[0]][0] + directions[ccp[1]][0], p[1]+directions[ccp[0]][1] + directions[ccp[1]][1])
+                    if tagged_garden_map[inside_p[0]][inside_p[1]][0] != a:
+                        side_area_cost += 1
         # print(f"area {a} cost: {len(areas[a])} * {area_cost}")
+        # print(f"area {a} side cost: {len(areas[a])} * {side_area_cost}")
         cost += len(areas[a]) * area_cost
+        side_cost += len(areas[a]) * side_area_cost
     print(f"total fence cost p1: {cost}")
+
+
+    # p2
+
+
+
+            
+
+    print(f"total fence cost p2: {side_cost}")
+
+
+    # p2
+    # iterate each line and count sides for each area
+
     return cost
 
 
