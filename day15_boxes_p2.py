@@ -61,17 +61,24 @@ def move_robot_up_down(boxmap, pos, direction):
         # view = "".join([boxmap[robot[0]][slice[0]:slice[1]+1] for slice in slices) 
         if '#' in view:
             return boxmap, pos
-        if set(view) == set(['.']):
+        if set(view) == {'.'}:
             # need to move all previous slices up or down
+            # sometimes two boxes push the same, one with left edge and the other with the right edge
+            # so with this algo we could move some cells twice but the second time they would be empty space
+            # and lose the shared box in the process
+            # so we keep track of what cells we already moved
+            moved_positions = set()
             for move_slices in slice_list[::-1]:
                 # print("preparing to move ", move_slices)
                 for slice in move_slices:
                     # print("moving ", list(range(slice[0], slice[1]+1)))
                     for s in range(slice[0], slice[1]+1):
                         # print("moving character ", boxmap[robot[0]-direction[0]][s], " from ",(robot[0]-direction[0],s)," to ", (robot[0],s), "over", boxmap[robot[0]][s])
-                        boxmap[robot[0]][s] = boxmap[robot[0]-direction[0]][s]
-                        boxmap[robot[0]-direction[0]][s] = '.'
-                robot = (robot[0]-direction[0], robot[1])
+                        if (robot[0],s) not in moved_positions:
+                            moved_positions.add((robot[0],s))
+                            boxmap[robot[0]][s] = boxmap[robot[0]-direction[0]][s]
+                            boxmap[robot[0]-direction[0]][s] = '.'
+                robot = (robot[0]-direction[0], robot[1]-direction[1])
             robot = (pos[0]+direction[0], pos[1]+direction[1])
             boxmap[robot[0]][robot[1]] = '@'
             boxmap[pos[0]][pos[1]] = '.'
@@ -104,13 +111,13 @@ def move_robot_up_down(boxmap, pos, direction):
 
 def solve_moves(boxmap, robot_moves):
     [print("".join(l)) for l in boxmap]
-    print("".join(robot_moves))
-    print(len(robot_moves))
+    # print("".join(robot_moves))
+    # print(len(robot_moves))
     pos = find_robot(boxmap)
-    print(pos)
+    # print(pos)
     # print("\033c", end="")
     for i,m in enumerate(robot_moves):
-        # time.sleep(0.15)
+        # time.sleep(0.5)
         # print('\u001B[1;1H', end="")
         # print("====",i, m, directions[m], pos)
         if (m == '^' or m == 'v'):
@@ -127,7 +134,6 @@ def solve_moves(boxmap, robot_moves):
             if boxmap[l][c] == '[':
                 gps_score += l*100 + c
     print(gps_score)
-    assert(gps_score == 1519991)
         
 
 if __name__ == '__main__':
