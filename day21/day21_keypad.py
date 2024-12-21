@@ -50,7 +50,7 @@ def up_down(a,b):
         return '^' * (a - b)
 
 
-def move_robot_numpad(code_from, code_to, n = 2):
+def move_robot_numpad(code_from, code_to, n = 1):
     pos_from = number_pad[code_from]
     pos_to = number_pad[code_to]
     moves = ''
@@ -60,67 +60,64 @@ def move_robot_numpad(code_from, code_to, n = 2):
     elif pos_from[0] == 3 and pos_to[1] == 0:
         moves += up_down(pos_from[0], pos_to[0])
         moves += left_right(pos_from[1], pos_to[1])
-    elif pos_from[0] < pos_to[0] and pos_from[1] < pos_to[1]:
-        moves += up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
     else:
-        moves += left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
-
-        # move_1 = left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
-        # move_2 = up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
-        # moves_1 = type_code_arrowpad('A'.join(type_code_arrowpad(move_1+'A'))+'A')
-        # moves_2 = type_code_arrowpad('A'.join(type_code_arrowpad(move_2+'A'))+'A')
-        #
-        # # if type_code_arrowpad('A'.join(type_code_arrowpad(move_2+'A'))+'A') < type_code_arrowpad('A'.join(type_code_arrowpad(move_1+'A'))+'A'):
-        # #     moves += move_2
-        # #     print("ohohoh")
-        # # else:
-        # #     moves += move_1
-        # if len(seq_to_string(type_code_arrowpad_n(move_2, n-1))) < len(seq_to_string(type_code_arrowpad_n(move_1, n-1))):
-        #     print('oh oh oh', pos_from, pos_to)
-        #     moves += move_2
-        # else:
-        #     moves += move_1
+        moves_1 = left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
+        moves_2 = up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
+        if sum(type_code_arrowpad_n(moves_2+'A', n-1)) < sum(type_code_arrowpad_n(moves_1+'A', n-1)):
+            moves += moves_2
+        else:
+            moves += moves_1
+    # elif pos_from[0] < pos_to[0] and pos_from[1] < pos_to[1]:
+    #     moves += up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
+    # else:
+    #     moves += left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
     return moves
 
-def move_robot_arrowpad(d_from, d_to, n = 2):
+def move_robot_arrowpad(d_from, d_to, n = 0):
     pos_from = arrow_pad[d_from]
     pos_to = arrow_pad[d_to]
     moves = ''
     if pos_from[1] == 0 and pos_to[0] == 0:
-        moves += up_down(pos_from[0], pos_to[0])
-        moves += left_right(pos_from[1], pos_to[1])
-    elif pos_from[1] == 0 and pos_to[0] == 0:
         moves += left_right(pos_from[1], pos_to[1])
         moves += up_down(pos_from[0], pos_to[0])
-    elif pos_from[0] < pos_to[0] and pos_from[1] < pos_to[1]:
-        moves += up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
+    elif pos_from[0] == 0 and pos_to[1] == 0:
+        moves += up_down(pos_from[0], pos_to[0])
+        moves += left_right(pos_from[1], pos_to[1])
     else:
-        moves += left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
+        moves_1 = left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
+        moves_2 = up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
+        if n > 0 and  (sum(type_code_arrowpad_n(moves_2 + 'A', n-1)) < sum(type_code_arrowpad_n(moves_1 + 'A', n-1))):
+            moves += moves_2
+        elif pos_from[1] < pos_to[1]: # OMG!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            moves += up_down(pos_from[0], pos_to[0]) + left_right(pos_from[1], pos_to[1])
+        else:
+            moves += left_right(pos_from[1], pos_to[1]) + up_down(pos_from[0], pos_to[0])
     return moves
 
 
-def type_code_numpad(keycode, n = 2):
+def type_code_numpad(keycode, n = 1):
     pos = 'A' 
     code_moves = []
     for k in keycode:
-        code_moves.append(move_robot_numpad(pos, k, n))
+        code_moves.append(move_robot_numpad(pos, k, n) + 'A')
         pos = k
     return code_moves
 
 @cache
-def type_code_arrowpad(move_sequence, n = 2):
+def type_code_arrowpad(move_sequence, n = 0):
     pos = 'A' 
     arrow_moves = []
     for k in move_sequence:
-        arrow_moves.append(move_robot_arrowpad(pos, k))
+        arrow_moves.append(move_robot_arrowpad(pos, k, n) + 'A')
         pos = k
     return arrow_moves
 
 @cache
-def type_code_arrowpad_n(move_sequence, n=2):
+def type_code_arrowpad_n(move_sequence, n=0):
+    # print('debug n = ',n, len(move_sequence), move_sequence)
     if n == 0:
-        return type_code_arrowpad(move_sequence)
-    return type_code_arrowpad(seq_to_string(type_code_arrowpad_n(move_sequence, n-1)))
+        return [len(seq_to_string(type_code_arrowpad(move_sequence)))]
+    return [sum(type_code_arrowpad_n(m, n-1)) for m in type_code_arrowpad(move_sequence, n-1)]
 
 def seq_to_string(seq):
     return ''.join(seq)
@@ -131,24 +128,25 @@ def print_keycodes(keycodes):
     print()
     print_arrow_pad()
     sum_codes = 0
+    sum_codes_2 = 0
     for keycode in keycodes:
         number_code = int(''.join([c for c in keycode if c in '1234567890']).lstrip('0'))
-        keypad_moves = type_code_numpad(keycode, 2)
-        arrow_moves_A = type_code_arrowpad('A'.join(keypad_moves) + 'A')
-        moves = type_code_arrowpad('A'.join(arrow_moves_A) + 'A')
-        print('===== ', str(number_code), keycode, len('A'.join(moves) + 'A'))
-        print('keypad:     ', 'A '.join(keypad_moves)+'A')
-        print('arrow A:    ', 'A '.join(arrow_moves_A) + 'A')
-        print('arrow B:    ', 'A '.join(moves) + 'A')
-        sum_codes += len('A'.join(moves) + 'A') * number_code
+        keypad_moves = type_code_numpad(keycode, 25)
+        arrow_moves_A = type_code_arrowpad(''.join(keypad_moves), 24)
+        moves = type_code_arrowpad(''.join(arrow_moves_A), 23)
+        print('===== ', str(number_code), keycode, len(''.join(moves)))
+        print('keypad:     ', ' '.join(keypad_moves))
+        print('arrow A:    ', ' '.join(arrow_moves_A))
+        print('arrow B:    ', ' '.join(moves))
+        sum_codes += len(''.join(moves)) * number_code
         # rec_moves = type_code_arrowpad_n(seq_to_string(keypad_moves), 1)
         # print('n robots:   ', 'A '.join(rec_moves)+'A')
+        m = type_code_arrowpad_n(seq_to_string(seq_to_string(keypad_moves)), 24)
+        print('m = ', sum(m), m)
+        print(len(m), len(arrow_moves_A))
+        sum_codes_2 += sum(m) * number_code
     print(sum_codes)
-
-    a = type_code_numpad('129A')
-    print(a) 
-    m = type_code_arrowpad_n(a[0] + 'A', 1)
-    print(m)
+    print(sum_codes_2)
     
 
 if __name__ == "__main__":
