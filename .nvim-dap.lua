@@ -14,7 +14,7 @@ dap.configurations.python = {
         name = "Launch file",
         program = "${file}",
         pythonPath = function()
-            return '/usr/bin/python3'
+            return '/home/linuxbrew/.linuxbrew/bin/python3'
         end,
     }
 }
