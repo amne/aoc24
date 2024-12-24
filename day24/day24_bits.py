@@ -70,7 +70,7 @@ def eval_ops(source_bits, source_ops):
             ops.remove((dest_bit, op))
     return bits
 
-def find_mangled_bits(bits, source_ops):
+def eval_bits(bits, source_ops):
     # I was in way over my head for p2.
     # But now I know how a carry adder actually works bit by bit
     # The pattern that helped most with fixing this by hand was that for each
@@ -79,23 +79,11 @@ def find_mangled_bits(bits, source_ops):
     # to fix the order of operations
     outputx = {k:v for k,v in bits.items() if k[0] == 'x'}
     outputy = {k:v for k,v in bits.items() if k[0] == 'y'}
-    outputz = {k:v for k,v in bits.items() if k[0] == 'z'}
     inputnumberx = int(''.join([str(v) for k,v in sorted(outputx.items(), reverse=True)]), 2)
     inputnumbery = int(''.join([str(v) for k,v in sorted(outputy.items(), reverse=True)]), 2)
-    outputnumber = int(''.join([str(v) for k,v in sorted(outputz.items(), reverse=True)]), 2)
     print('x,y: ',inputnumberx, inputnumbery)
     print('x+y: ',inputnumberx+inputnumbery, bin(inputnumberx+inputnumbery))
-    print('  z: ',outputnumber, bin(outputnumber))
     good_z_bits = {'z'+f"{k:02d}":v for k,v in enumerate(reversed(bin(inputnumberx+inputnumbery)[2:]))}
-    actual_z_bits = {'z'+f"{k:02d}":v for k,v in enumerate(reversed(bin(outputnumber)[2:]))}
-    mangled_z_bits = []
-    for k,v in good_z_bits.items():
-        if actual_z_bits[k] != v:
-            mangled_z_bits.append(k)
-    print(good_z_bits)
-    print(actual_z_bits)
-    print(mangled_z_bits)
-
 
     op_z = [op for op in source_ops.values() if op[0][0] == 'z']
     op_tree_z = {}
@@ -103,16 +91,34 @@ def find_mangled_bits(bits, source_ops):
         op_tree_z[op[0]] = op_tree(op, source_ops)
     z_bits = {}
     z_names = [z for z in sorted(op_tree_z.keys())]
-    # good_wires = []
+    swapped_pairs = []
     for z in z_names:
         z_tree = op_tree_z[z]
         z_bits[z] = eval_tree(z_tree, bits)
-        print(z, '=(',z_bits[z],',',int(good_z_bits[z]),')', print_tree_paranthesis(z_tree))
-        if z in mangled_z_bits:
-            break
-        # good_wires.extend(walk_op_tree(z_tree))
-    # good_wires = set(good_wires)
-    # print(len(good_wires), good_wires)
+        print(z, '=(',z_bits[z],',',int(good_z_bits[z]),')') #, print_tree_paranthesis(z_tree))
+        if z_bits[z] != int(good_z_bits[z]):
+            swap_pair = find_mangled_gatepair(z, z_tree, source_ops)
+            op1 = source_ops[swap_pair[0]]
+            op2 = source_ops[swap_pair[1]]
+            source_ops[swap_pair[0]] = (swap_pair[0], op2[1])
+            source_ops[swap_pair[1]] = (swap_pair[1], op1[1])
+            op_z = [op for op in source_ops.values() if op[0][0] == 'z']
+            op_tree_z = {}
+            for op in op_z:
+                op_tree_z[op[0]] = op_tree(op, source_ops)
+            z_tree = op_tree_z[z] 
+            z_bits[z] = eval_tree(z_tree, bits)
+            print('fixed z bit = ',z, z_bits[z])
+            print(op1, op2)
+            if z_bits[z] != int(good_z_bits[z]):
+                print('still broken')
+                break
+            swapped_pairs.extend(swap_pair)
+    z_bitstring = ''.join(reversed([str(z_bits[z_bit]) for z_bit in sorted(z_bits.keys())]))
+    good_z_bitstring = ''.join(reversed([str(good_z_bits[z_bit]) for z_bit in sorted(good_z_bits.keys())]))
+    print(z_bitstring.rjust(len(good_z_bitstring)), int(z_bitstring, 2))
+    print(good_z_bitstring, int(good_z_bitstring, 2))
+    print(len(swapped_pairs), ','.join(sorted(swapped_pairs)))
     ### swaps
     # z09, gwh
     # wgb, wbw
@@ -121,12 +127,47 @@ def find_mangled_bits(bits, source_ops):
     ### anwer
     # gwh,jct,rcb,wbw,wgb,z09,z21,z39
 
-    z_bitstring = ''.join(reversed([str(z_bits[z_bit]) for z_bit in sorted(z_bits.keys())]))
-    good_z_bitstring = ''.join(reversed([str(good_z_bits[z_bit]) for z_bit in sorted(good_z_bits.keys())]))
-    print(z_bitstring, int(z_bitstring, 2))
-    print(good_z_bitstring, int(good_z_bitstring, 2))
 
 
+
+def find_mangled_gatepair(failed_bit_name, failed_op_tree, ops):
+    # very hardcoded logic to find where the adder is broken
+    # the pattern we're looking for is
+    # zNN = bit XOR bit
+    # if the op is not XOR then mark zNN for swap
+    bit_num = int(failed_bit_name[1:])
+    swap_pair = []
+    if failed_op_tree[1][0] != 'XOR' and bit_num < 45:
+        swap_pair.append(failed_bit_name)
+
+    # now find the xNN XOR yNN and trace its dest bit to find the actual XOR
+    # that should feed into zNN. that bit will be our swap candidate
+    source_x_y_op = None
+    op_bits = [f'x{bit_num:02d}', f'y{bit_num:02d}']
+    for op in ops.values():
+        if op[1][1][0] in op_bits and op[1][1][1] in op_bits and op[1][0] == 'XOR':
+            source_x_y_op = op
+            break
+    if source_x_y_op is not None:
+        dest_bit = source_x_y_op[0]
+        # find the XOR op where this dest bit is the left or right bit
+        for op in ops.values():
+            if op[1][1][0] == dest_bit or op[1][1][1] == dest_bit:
+                if op[1][0] == 'XOR':
+                    swap_pair.append(op[0])
+                    break
+        # if we still don't have a swap pair then we need to find xNN AND yANN
+        # and swap the carry bit with the add between xNN and yNN
+        if len(swap_pair) == 0:
+            swap_pair.append(dest_bit)
+            for op in ops.values():
+                if op[1][1][0] in op_bits and op[1][1][1] in op_bits and op[1][0] == 'AND':
+                    carry_x_y_op = op
+                    swap_pair.append(carry_x_y_op[0])
+                    break
+    # TODO: handle z00 and z45
+    print(swap_pair)
+    return swap_pair
 
 
 
@@ -176,7 +217,6 @@ if __name__ == '__main__':
     # bits,ops = load_bits('day24_bits_fixed.txt')
     # bits,ops = load_bits('day24_bits_sample_2.txt')
     # bits,ops = load_bits('day24_bits_sample.txt')
-    bits = eval_ops(bits,ops)
-    find_mangled_bits(bits, ops)
-    to_plantuml(bits, ops)
+    # bits = eval_ops(bits,ops)
+    eval_bits(bits, ops)
                          
